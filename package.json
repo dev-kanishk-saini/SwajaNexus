@@ -1,0 +1,25 @@
+{
+  "name": "device-management",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.2.3",
+    "react": "^18",
+    "react-dom": "^18",
+    "mongoose": "^8.3.4",
+    "lucide-react": "^0.378.0",
+    "react-pdf": "^7.7.1",
+    "react-dropzone": "^14.2.3",
+    "clsx": "^2.1.1"
+  },
+  "devDependencies": {
+    "eslint": "^8",
+    "eslint-config-next": "14.2.3"
+  }
+}
