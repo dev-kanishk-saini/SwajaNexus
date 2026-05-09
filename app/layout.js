@@ -1,6 +1,7 @@
 import "./globals.css";
 import Sidebar from "@/components/layout/Sidebar";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
   title: "NexaHome — Device Management",
@@ -24,6 +25,7 @@ export default function RootLayout({ children }) {
             {children}
           </main>
           <SpeedInsights/>
+          <Analytics />
         </div>
       </body>
     </html>
