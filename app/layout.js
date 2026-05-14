@@ -12,16 +12,18 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <div style={{ display: "flex", minHeight: "100vh" }}>
+        {/* <div style={{ display: "flex", minHeight: "100vh" }}> */}
+        <div className="app-layout">
           <Sidebar />
-          <main
+          {/* <main
             style={{
               flex: 1,
               marginLeft: "var(--sidebar-width)",
               minHeight: "100vh",
               overflow: "auto",
             }}
-          >
+          > */}
+          <main className="app-main">
             {children}
           </main>
           <SpeedInsights/>

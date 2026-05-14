@@ -1,83 +1,13 @@
-// "use client";
-
-// import { useState, useRef } from "react";
-// import { iconMap } from "@/lib/constants";
-
-// export default function MapEditor({ mapUrl, devices }) {
-//   const [deviceList, setDeviceList] = useState(devices || []);
-//   const mapRef = useRef(null);
-
-//   return (
-//     <div
-//       ref={mapRef}
-//       style={{
-//         position: "relative",      // ✅ REQUIRED for absolute children to work
-//         width: "100%",
-//         border: "1px solid var(--border)",
-//         borderRadius: 8,
-//         overflow: "visible",       // ✅ changed from "hidden" so icons aren't clipped
-//         marginBottom: 24,
-//         display: "inline-block",
-//       }}
-//     >
-//       {/* Map image */}
-//       <img
-//         src={mapUrl}
-//         alt="Area Map"
-//         style={{
-//           display: "block",        // removes bottom gap on img
-//           width: "100%",
-//           height: "auto",          // ✅ let height follow naturally
-//           borderRadius: 8,
-//         }}
-//       />
-
-//       {/* Device icons */}
-//       {deviceList.map((device) => {
-//         // Skip devices with no position set
-//         if (device.x === undefined || device.y === undefined) return null;
-
-//         return (
-//           <div
-//             key={device._id}
-//             style={{
-//               position: "absolute",
-//               left: `${device.x}%`,       // ✅ percentage-based positioning
-//               top: `${device.y}%`,
-//               transform: "translate(-50%, -50%)",
-//               background: "var(--accent)",
-//               borderRadius: "50%",
-//               width: 32,
-//               height: 32,
-//               display: "flex",
-//               alignItems: "center",
-//               justifyContent: "center",
-//               cursor: "pointer",
-//               boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
-//               zIndex: 10,
-//             }}
-//             title={device.name}
-//           >
-//             <img
-//               src={iconMap[device.type]}
-//               alt={device.type}
-//               style={{ width: 18, height: 18 }}
-//             />
-//           </div>
-//         );
-//       })}
-//     </div>
-//   );
-// }
 
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { iconMap, DEVICE_TYPES } from "@/lib/constants";
 import {
   Pencil, Trash2, Save, X, Check, Move,
   ChevronDown, Lightbulb, ToggleRight, Thermometer, Camera, DoorOpen
 } from "lucide-react";
+
 
 // ── Lucide fallback icons per device type (shown if PNG missing) ──
 const LucideIconMap = {
@@ -228,12 +158,49 @@ export default function MapEditor({ mapUrl, devices, siteId, areaId, onDevicesCh
   const [selectedDevice, setSelected] = useState(null);     // device whose popup is open
   const [saving, setSaving]           = useState(false);
   const [showTypeMenu, setShowTypeMenu] = useState(false);  // "Add Device" dropdown
+  const [mapWidth, setMapWidth] = useState(0);
+ 
+
+
+
+
+
 
   const mapRef    = useRef(null);
+  const observerRef = useRef(null);
   // Keep original data for Cancel
   const originalRef = useRef(
     (devices || []).map((d) => ({ ...d, x: d.x ?? 50, y: d.y ?? 50 }))
   );
+
+   //Map Width Monitor state.
+// DELETE the useEffect that has observer in it, replace with this:
+const mapCallbackRef = useCallback((node) => {
+  mapRef.current = node;  // keep mapRef working for drag handlers
+
+  if (observerRef.current) {
+    observerRef.current.disconnect();
+    observerRef.current = null;
+  }
+
+  if (node) {
+    setMapWidth(node.getBoundingClientRect().width);
+    const observer = new ResizeObserver((entries) => {
+      setMapWidth(entries[0].contentRect.width);
+    });
+    observer.observe(node);
+    observerRef.current = observer;
+  }
+}, []);
+
+
+
+const iconSize = mapWidth > 0 ? Math.round(mapWidth * 0.025) : 36;
+
+
+
+
+
 
   // ── Enter edit mode ──
   const enterEdit = () => {
@@ -333,6 +300,9 @@ export default function MapEditor({ mapUrl, devices, siteId, areaId, onDevicesCh
     );
   }, [draggingId, dragOffset, mode]);
 
+
+
+
   // ── Mouse up — stop drag ──
   const handleMapMouseUp = useCallback(() => {
     setDraggingId(null);
@@ -365,6 +335,7 @@ export default function MapEditor({ mapUrl, devices, siteId, areaId, onDevicesCh
   // ── Touch support (mobile) ──
   const handleIconTouchStart = useCallback((e, device) => {
     if (mode !== "edit") return;
+      e.preventDefault();   
     e.stopPropagation();
     const touch = e.touches[0];
     const mapRect = mapRef.current.getBoundingClientRect();
@@ -515,7 +486,7 @@ export default function MapEditor({ mapUrl, devices, siteId, areaId, onDevicesCh
 
       {/* ── Map container ── */}
       <div
-        ref={mapRef}
+        ref={mapCallbackRef}
         onMouseMove={handleMapMouseMove}
         onMouseUp={handleMapMouseUp}
         onMouseLeave={handleMapMouseUp}      // stop drag if cursor leaves map
@@ -526,6 +497,7 @@ export default function MapEditor({ mapUrl, devices, siteId, areaId, onDevicesCh
           width: "100%",
           border: "1px solid #e3e6ef",
           borderRadius: 8,
+          touchAction: mode === "edit" ? "none" : "auto",
           overflow: "hidden",
           userSelect: "none",                 // prevent text selection while dragging
           cursor: draggingId ? "grabbing" : "default",
@@ -570,9 +542,10 @@ export default function MapEditor({ mapUrl, devices, siteId, areaId, onDevicesCh
                 position: "absolute",
                 left: `${x}%`,
                 top:  `${y}%`,
+                touchAction: mode === "edit" ? "none" : "auto",
                 transform: "translate(-50%, -50%)",
-                width: 36,
-                height: 36,
+                width: iconSize,
+                height: iconSize,
                 borderRadius: "50%",
                 background: "#fff",
                 border: `2.5px solid ${color}`,
@@ -596,11 +569,11 @@ export default function MapEditor({ mapUrl, devices, siteId, areaId, onDevicesCh
                   src={iconMap[device.type]}
                   alt={device.type}
                   draggable={false}
-                  style={{ width: 18, height: 18 }}
+                  style={{ width: iconSize * 0.5, height: iconSize * 0.5 }}
                   onError={(e) => { e.target.style.display = "none"; }}
                 />
               ) : (
-                <Icon size={16} color={color} />
+                <Icon size={iconSize * 0.44} color={color} />
               )}
 
               {/* Device name label */}
@@ -611,7 +584,8 @@ export default function MapEditor({ mapUrl, devices, siteId, areaId, onDevicesCh
                 transform: "translateX(-50%)",
                 background: "rgba(17,24,39,0.82)",
                 color: "#fff",
-                fontSize: 10,
+                // fontSize: 10,
+                fontSize:  iconSize * 0.28,
                 fontWeight: 500,
                 padding: "2px 6px",
                 borderRadius: 4,

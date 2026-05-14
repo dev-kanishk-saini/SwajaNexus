@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -14,7 +16,10 @@ function SiteFormModal({ open, onClose, initial, onSaved }) {
 
   useEffect(() => {
     if (!open) return;
-    setForm(initial ? { name: initial.name || "", description: initial.description || "", location: initial.location || "" } : { name: "", description: "", location: "" });
+    setForm(initial
+      ? { name: initial.name || "", description: initial.description || "", location: initial.location || "" }
+      : { name: "", description: "", location: "" }
+    );
   }, [initial, open]);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -23,9 +28,8 @@ function SiteFormModal({ open, onClose, initial, onSaved }) {
     e.preventDefault();
     setLoading(true);
     const url = initial ? `/api/sites/${initial._id}` : "/api/sites";
-    const method = initial ? "PUT" : "POST";
     const res = await fetch(url, {
-      method,
+      method: initial ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
@@ -36,7 +40,7 @@ function SiteFormModal({ open, onClose, initial, onSaved }) {
 
   return (
     <Modal open={open} onClose={onClose} title={initial ? "Edit Site" : "Add New Site"}>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <FormField label="Site Name *">
           <Input value={form.name} onChange={set("name")} placeholder="e.g. Sharma Residence" required />
         </FormField>
@@ -48,7 +52,9 @@ function SiteFormModal({ open, onClose, initial, onSaved }) {
         </FormField>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 4 }}>
           <Button variant="secondary" onClick={onClose} type="button">Cancel</Button>
-          <Button type="submit" disabled={loading}>{loading ? "Saving…" : initial ? "Update" : "Add Site"}</Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? "Saving…" : initial ? "Update Site" : "Add Site"}
+          </Button>
         </div>
       </form>
     </Modal>
@@ -56,15 +62,27 @@ function SiteFormModal({ open, onClose, initial, onSaved }) {
 }
 
 export default function SitesPage() {
-  const [sites, setSites] = useState([]);
+  const [sites, setSites]     = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState({ open: false, site: null });
+  const [fetchError, setFetchError] = useState("");
+  const [modal, setModal]     = useState({ open: false, site: null });
   const [confirm, setConfirm] = useState({ open: false, id: null });
 
   useEffect(() => {
     fetch("/api/sites")
       .then((r) => r.json())
-      .then((d) => { setSites(d); setLoading(false); });
+      .then((d) => {
+        if (Array.isArray(d)) {
+          setSites(d);
+        } else {
+          setFetchError(d?.error || "Failed to load sites. Check your MongoDB connection.");
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        setFetchError("Network error: " + err.message);
+        setLoading(false);
+      });
   }, []);
 
   const handleSaved = (site) => {
@@ -93,10 +111,28 @@ export default function SitesPage() {
         }
       />
 
-      <div style={{ padding: "32px 40px" }}>
+      <div className="page-content">
+        {/* Connection error banner */}
+        {fetchError && (
+          <div style={{
+            background: "var(--danger-dim)",
+            border: "1px solid rgba(229,72,72,0.25)",
+            borderRadius: "var(--radius)",
+            padding: "16px 20px",
+            marginBottom: 24,
+            color: "var(--danger)",
+          }}>
+            <strong>Connection Error</strong>
+            <p style={{ marginTop: 4, fontSize: 13, color: "var(--text-secondary)" }}>{fetchError}</p>
+            <p style={{ marginTop: 4, fontSize: 12, color: "var(--text-muted)" }}>
+              Check your MONGODB_URI in .env.local and your Atlas IP whitelist.
+            </p>
+          </div>
+        )}
+
         {loading ? (
           <Spinner />
-        ) : sites.length === 0 ? (
+        ) : sites.length === 0 && !fetchError ? (
           <EmptyState
             icon={Building2}
             title="No sites yet"
@@ -108,7 +144,7 @@ export default function SitesPage() {
             }
           />
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
+          <div className="card-grid">
             {sites.map((site) => (
               <div
                 key={site._id}
@@ -116,40 +152,42 @@ export default function SitesPage() {
                   background: "var(--bg-surface)",
                   border: "1px solid var(--border)",
                   borderRadius: "var(--radius)",
-                  padding: 24,
+                  padding: 22,
                   display: "flex",
                   flexDirection: "column",
                   gap: 12,
-                  transition: "border-color 0.15s",
+                  boxShadow: "var(--shadow-sm)",
+                  transition: "box-shadow 0.15s, border-color 0.15s",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--border-light)")}
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = "var(--shadow-md)";
+                  e.currentTarget.style.borderColor = "var(--border-light)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = "var(--shadow-sm)";
+                  e.currentTarget.style.borderColor = "var(--border)";
+                }}
               >
                 {/* Icon + name */}
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-                  <div
-                    style={{
-                      width: 40,
-                      height: 40,
-                      background: "var(--accent-dim)",
-                      borderRadius: 10,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
+                  <div style={{
+                    width: 40, height: 40,
+                    background: "var(--accent-dim)",
+                    borderRadius: 10,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0,
+                  }}>
                     <Building2 size={18} color="var(--accent)" />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3
-                      className="truncate"
-                      style={{ fontSize: 16, fontFamily: "'Syne',sans-serif", marginBottom: 2 }}
-                    >
+                    <h3 className="truncate" style={{ fontSize: 15, marginBottom: 3 }}>
                       {site.name}
                     </h3>
                     {site.location && (
-                      <p style={{ color: "var(--text-muted)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                      <p style={{
+                        color: "var(--text-muted)", fontSize: 12,
+                        display: "flex", alignItems: "center", gap: 3,
+                      }}>
                         <MapPin size={11} /> {site.location}
                       </p>
                     )}
@@ -163,34 +201,22 @@ export default function SitesPage() {
                 )}
 
                 {/* Actions */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "auto", paddingTop: 8, borderTop: "1px solid var(--border)" }}>
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  marginTop: "auto", paddingTop: 12, borderTop: "1px solid var(--border)",
+                }}>
                   <div style={{ display: "flex", gap: 6 }}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setModal({ open: true, site })}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => setModal({ open: true, site })}>
                       <Pencil size={13} />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setConfirm({ open: true, id: site._id })}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => setConfirm({ open: true, id: site._id })}>
                       <Trash2 size={13} color="var(--danger)" />
                     </Button>
                   </div>
-                  <Link
-                    href={`/sites/${site._id}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                      color: "var(--accent)",
-                      fontSize: 13,
-                      fontWeight: 500,
-                    }}
-                  >
+                  <Link href={`/sites/${site._id}`} style={{
+                    display: "flex", alignItems: "center", gap: 4,
+                    color: "var(--accent)", fontSize: 13, fontWeight: 500,
+                  }}>
                     View Areas <ChevronRight size={14} />
                   </Link>
                 </div>
@@ -206,7 +232,6 @@ export default function SitesPage() {
         initial={modal.site}
         onSaved={handleSaved}
       />
-
       <ConfirmDialog
         open={confirm.open}
         onClose={() => setConfirm({ open: false, id: null })}
