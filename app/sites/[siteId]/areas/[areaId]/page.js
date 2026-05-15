@@ -258,216 +258,216 @@ function MapUpload({ area, siteId, devices, setDevices, onMapUpdated, onMapRemov
 /* ══════════════════════════════════════════════
    NETWORK CONFIG SECTION
    ══════════════════════════════════════════════ */
-function NetworkConfig({ area, siteId, onNetworkConfigUpdated }) {
-  const [uploading, setUploading]         = useState(false);
-  const [removing, setRemoving]           = useState(false);
-  const [confirmRemove, setConfirmRemove] = useState(false);
-  const [parseError, setParseError]       = useState("");
-  const [viewJson, setViewJson]           = useState(false);
-  const fileRef = useRef();
+// function NetworkConfig({ area, siteId, onNetworkConfigUpdated }) {
+//   const [uploading, setUploading]         = useState(false);
+//   const [removing, setRemoving]           = useState(false);
+//   const [confirmRemove, setConfirmRemove] = useState(false);
+//   const [parseError, setParseError]       = useState("");
+//   const [viewJson, setViewJson]           = useState(false);
+//   const fileRef = useRef();
 
-  const handleUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.name.endsWith(".json")) {
-      setParseError("Only .json files are accepted.");
-      if (fileRef.current) fileRef.current.value = "";
-      return;
-    }
-    setParseError("");
-    setUploading(true);
-    const text = await file.text();
-    let parsed;
-    try {
-      parsed = JSON.parse(text);
-    } catch {
-      setParseError("Invalid JSON — the file could not be parsed.");
-      setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
-      return;
-    }
-    const res = await fetch(`/api/sites/${siteId}/areas/${area._id}/network`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ networkConfig: parsed }),
-    });
-    setUploading(false);
-    if (fileRef.current) fileRef.current.value = "";
-    if (res.ok) {
-      const data = await res.json();
-      onNetworkConfigUpdated(data.networkConfig);
-    } else {
-      setParseError("Failed to save network config. Please try again.");
-    }
-  };
+//   const handleUpload = async (e) => {
+//     const file = e.target.files?.[0];
+//     if (!file) return;
+//     if (!file.name.endsWith(".json")) {
+//       setParseError("Only .json files are accepted.");
+//       if (fileRef.current) fileRef.current.value = "";
+//       return;
+//     }
+//     setParseError("");
+//     setUploading(true);
+//     const text = await file.text();
+//     let parsed;
+//     try {
+//       parsed = JSON.parse(text);
+//     } catch {
+//       setParseError("Invalid JSON — the file could not be parsed.");
+//       setUploading(false);
+//       if (fileRef.current) fileRef.current.value = "";
+//       return;
+//     }
+//     const res = await fetch(`/api/sites/${siteId}/areas/${area._id}/network`, {
+//       method: "PUT",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ networkConfig: parsed }),
+//     });
+//     setUploading(false);
+//     if (fileRef.current) fileRef.current.value = "";
+//     if (res.ok) {
+//       const data = await res.json();
+//       onNetworkConfigUpdated(data.networkConfig);
+//     } else {
+//       setParseError("Failed to save network config. Please try again.");
+//     }
+//   };
 
-  const handleRemove = async () => {
-    setRemoving(true);
-    await fetch(`/api/sites/${siteId}/areas/${area._id}/network`, { method: "DELETE" });
-    setRemoving(false);
-    setConfirmRemove(false);
-    onNetworkConfigUpdated(null);
-  };
+//   const handleRemove = async () => {
+//     setRemoving(true);
+//     await fetch(`/api/sites/${siteId}/areas/${area._id}/network`, { method: "DELETE" });
+//     setRemoving(false);
+//     setConfirmRemove(false);
+//     onNetworkConfigUpdated(null);
+//   };
 
-  const hasConfig = area.networkConfig !== null && area.networkConfig !== undefined;
+//   const hasConfig = area.networkConfig !== null && area.networkConfig !== undefined;
 
-  return (
-    <div style={{
-      background: "var(--bg-surface)",
-      border: "1px solid var(--border)",
-      borderRadius: "var(--radius)",
-      padding: "clamp(16px, 3vw, 24px)",
-      marginBottom: 24,
-    }}>
-      {/* Header */}
-      <div style={{
-        display: "flex", alignItems: "center",
-        justifyContent: "space-between", flexWrap: "wrap", gap: 8,
-        marginBottom: hasConfig || parseError ? 14 : 0,
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <h2 style={{ fontSize: 16 }}>Network Config</h2>
-          {hasConfig ? (
-            <span style={{
-              display: "inline-flex", alignItems: "center", gap: 4,
-              fontSize: 12, fontWeight: 500, color: "var(--success)",
-              background: "var(--success-dim)",
-              border: "1px solid rgba(46,184,114,0.2)",
-              padding: "2px 9px", borderRadius: 999,
-            }}>
-              <CheckCircle2 size={11} /> Saved
-            </span>
-          ) : (
-            <span style={{
-              fontSize: 12, fontWeight: 500, color: "var(--text-muted)",
-              background: "var(--bg-elevated)", border: "1px solid var(--border)",
-              padding: "2px 9px", borderRadius: 999,
-            }}>
-              Not uploaded
-            </span>
-          )}
-        </div>
+//   return (
+//     <div style={{
+//       background: "var(--bg-surface)",
+//       border: "1px solid var(--border)",
+//       borderRadius: "var(--radius)",
+//       padding: "clamp(16px, 3vw, 24px)",
+//       marginBottom: 24,
+//     }}>
+//       {/* Header */}
+//       <div style={{
+//         display: "flex", alignItems: "center",
+//         justifyContent: "space-between", flexWrap: "wrap", gap: 8,
+//         marginBottom: hasConfig || parseError ? 14 : 0,
+//       }}>
+//         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+//           <h2 style={{ fontSize: 16 }}>Network Config</h2>
+//           {hasConfig ? (
+//             <span style={{
+//               display: "inline-flex", alignItems: "center", gap: 4,
+//               fontSize: 12, fontWeight: 500, color: "var(--success)",
+//               background: "var(--success-dim)",
+//               border: "1px solid rgba(46,184,114,0.2)",
+//               padding: "2px 9px", borderRadius: 999,
+//             }}>
+//               <CheckCircle2 size={11} /> Saved
+//             </span>
+//           ) : (
+//             <span style={{
+//               fontSize: 12, fontWeight: 500, color: "var(--text-muted)",
+//               background: "var(--bg-elevated)", border: "1px solid var(--border)",
+//               padding: "2px 9px", borderRadius: 999,
+//             }}>
+//               Not uploaded
+//             </span>
+//           )}
+//         </div>
 
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {hasConfig && (
-            <Button variant="secondary" size="sm" onClick={() => setViewJson((v) => !v)}>
-              <FileJson size={13} /> {viewJson ? "Hide JSON" : "View JSON"}
-            </Button>
-          )}
-          <Button variant="secondary" size="sm"
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading || removing}
-          >
-            <Upload size={13} />
-            {uploading ? "Uploading…" : hasConfig ? "Replace" : "Upload JSON"}
-          </Button>
-          {hasConfig && (
-            <Button variant="danger" size="sm"
-              onClick={() => setConfirmRemove(true)}
-              disabled={removing || uploading}
-            >
-              <X size={13} /> {removing ? "Removing…" : "Remove"}
-            </Button>
-          )}
-        </div>
+//         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+//           {hasConfig && (
+//             <Button variant="secondary" size="sm" onClick={() => setViewJson((v) => !v)}>
+//               <FileJson size={13} /> {viewJson ? "Hide JSON" : "View JSON"}
+//             </Button>
+//           )}
+//           <Button variant="secondary" size="sm"
+//             onClick={() => fileRef.current?.click()}
+//             disabled={uploading || removing}
+//           >
+//             <Upload size={13} />
+//             {uploading ? "Uploading…" : hasConfig ? "Replace" : "Upload JSON"}
+//           </Button>
+//           {hasConfig && (
+//             <Button variant="danger" size="sm"
+//               onClick={() => setConfirmRemove(true)}
+//               disabled={removing || uploading}
+//             >
+//               <X size={13} /> {removing ? "Removing…" : "Remove"}
+//             </Button>
+//           )}
+//         </div>
 
-        <input ref={fileRef} type="file" accept=".json"
-          style={{ display: "none" }} onChange={handleUpload} />
-      </div>
+//         <input ref={fileRef} type="file" accept=".json"
+//           style={{ display: "none" }} onChange={handleUpload} />
+//       </div>
 
-      {/* Parse error */}
-      {parseError && (
-        <div style={{
-          display: "flex", alignItems: "flex-start", gap: 8,
-          background: "var(--danger-dim)",
-          border: "1px solid rgba(229,72,72,0.2)",
-          borderRadius: 7, padding: "10px 14px", marginBottom: 12,
-        }}>
-          <AlertCircle size={15} color="var(--danger)" style={{ flexShrink: 0, marginTop: 1 }} />
-          <p style={{ fontSize: 13, color: "var(--danger)" }}>{parseError}</p>
-        </div>
-      )}
+//       {/* Parse error */}
+//       {parseError && (
+//         <div style={{
+//           display: "flex", alignItems: "flex-start", gap: 8,
+//           background: "var(--danger-dim)",
+//           border: "1px solid rgba(229,72,72,0.2)",
+//           borderRadius: 7, padding: "10px 14px", marginBottom: 12,
+//         }}>
+//           <AlertCircle size={15} color="var(--danger)" style={{ flexShrink: 0, marginTop: 1 }} />
+//           <p style={{ fontSize: 13, color: "var(--danger)" }}>{parseError}</p>
+//         </div>
+//       )}
 
-      {/* Confirm remove */}
-      {confirmRemove && (
-        <div style={{
-          background: "var(--danger-dim)",
-          border: "1px solid rgba(229,72,72,0.2)",
-          borderRadius: 8, padding: "12px 16px", marginBottom: 12,
-          display: "flex", alignItems: "center",
-          justifyContent: "space-between", gap: 12, flexWrap: "wrap",
-        }}>
-          <p style={{ fontSize: 13, color: "var(--danger)", fontWeight: 500 }}>
-            Remove the stored network config? This cannot be undone.
-          </p>
-          <div style={{ display: "flex", gap: 8 }}>
-            <Button variant="secondary" size="sm" onClick={() => setConfirmRemove(false)}>Cancel</Button>
-            <Button variant="danger" size="sm" onClick={handleRemove} disabled={removing}>
-              {removing ? "Removing…" : "Yes, Remove"}
-            </Button>
-          </div>
-        </div>
-      )}
+//       {/* Confirm remove */}
+//       {confirmRemove && (
+//         <div style={{
+//           background: "var(--danger-dim)",
+//           border: "1px solid rgba(229,72,72,0.2)",
+//           borderRadius: 8, padding: "12px 16px", marginBottom: 12,
+//           display: "flex", alignItems: "center",
+//           justifyContent: "space-between", gap: 12, flexWrap: "wrap",
+//         }}>
+//           <p style={{ fontSize: 13, color: "var(--danger)", fontWeight: 500 }}>
+//             Remove the stored network config? This cannot be undone.
+//           </p>
+//           <div style={{ display: "flex", gap: 8 }}>
+//             <Button variant="secondary" size="sm" onClick={() => setConfirmRemove(false)}>Cancel</Button>
+//             <Button variant="danger" size="sm" onClick={handleRemove} disabled={removing}>
+//               {removing ? "Removing…" : "Yes, Remove"}
+//             </Button>
+//           </div>
+//         </div>
+//       )}
 
-      {/* Config summary */}
-      {hasConfig && (
-        <div>
-          <div style={{
-            display: "flex", gap: 20, flexWrap: "wrap",
-            padding: "11px 14px",
-            background: "var(--bg-elevated)",
-            borderRadius: 7, fontSize: 13, color: "var(--text-secondary)",
-          }}>
-            <span>
-              <strong style={{ color: "var(--text-primary)" }}>Keys: </strong>
-              {Object.keys(area.networkConfig).length}
-            </span>
-            <span>
-              <strong style={{ color: "var(--text-primary)" }}>Size: </strong>
-              {(JSON.stringify(area.networkConfig).length / 1024).toFixed(2)} KB
-            </span>
-            <span>
-              <strong style={{ color: "var(--text-primary)" }}>Type: </strong>
-              {Array.isArray(area.networkConfig) ? "Array" : "Object"}
-            </span>
-          </div>
-          {viewJson && (
-            <pre style={{
-              marginTop: 10, padding: 14,
-              background: "#f8fafc",
-              border: "1px solid var(--border)",
-              borderRadius: 7, fontSize: 12, lineHeight: 1.6,
-              overflowX: "auto", color: "#1e293b",
-              maxHeight: 320, overflowY: "auto",
-            }}>
-              {JSON.stringify(area.networkConfig, null, 2)}
-            </pre>
-          )}
-        </div>
-      )}
+//       {/* Config summary */}
+//       {hasConfig && (
+//         <div>
+//           <div style={{
+//             display: "flex", gap: 20, flexWrap: "wrap",
+//             padding: "11px 14px",
+//             background: "var(--bg-elevated)",
+//             borderRadius: 7, fontSize: 13, color: "var(--text-secondary)",
+//           }}>
+//             <span>
+//               <strong style={{ color: "var(--text-primary)" }}>Keys: </strong>
+//               {Object.keys(area.networkConfig).length}
+//             </span>
+//             <span>
+//               <strong style={{ color: "var(--text-primary)" }}>Size: </strong>
+//               {(JSON.stringify(area.networkConfig).length / 1024).toFixed(2)} KB
+//             </span>
+//             <span>
+//               <strong style={{ color: "var(--text-primary)" }}>Type: </strong>
+//               {Array.isArray(area.networkConfig) ? "Array" : "Object"}
+//             </span>
+//           </div>
+//           {viewJson && (
+//             <pre style={{
+//               marginTop: 10, padding: 14,
+//               background: "#f8fafc",
+//               border: "1px solid var(--border)",
+//               borderRadius: 7, fontSize: 12, lineHeight: 1.6,
+//               overflowX: "auto", color: "#1e293b",
+//               maxHeight: 320, overflowY: "auto",
+//             }}>
+//               {JSON.stringify(area.networkConfig, null, 2)}
+//             </pre>
+//           )}
+//         </div>
+//       )}
 
-      {/* Empty upload zone */}
-      {!hasConfig && !parseError && (
-        <div
-          onClick={() => fileRef.current?.click()}
-          style={{
-            height: 90,
-            border: "2px dashed var(--border)",
-            borderRadius: 8,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            gap: 10, color: "var(--text-muted)", cursor: "pointer",
-            transition: "border-color 0.15s",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
-          onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
-        >
-          <FileJson size={20} />
-          <span style={{ fontSize: 14 }}>Click to upload network config JSON</span>
-        </div>
-      )}
-    </div>
-  );
-}
+//       {/* Empty upload zone */}
+//       {!hasConfig && !parseError && (
+//         <div
+//           onClick={() => fileRef.current?.click()}
+//           style={{
+//             height: 90,
+//             border: "2px dashed var(--border)",
+//             borderRadius: 8,
+//             display: "flex", alignItems: "center", justifyContent: "center",
+//             gap: 10, color: "var(--text-muted)", cursor: "pointer",
+//             transition: "border-color 0.15s",
+//           }}
+//           onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+//           onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+//         >
+//           <FileJson size={20} />
+//           <span style={{ fontSize: 14 }}>Click to upload network config JSON</span>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
 
 /* ══════════════════════════════════════════════
    DEVICE TABLE ROW
@@ -615,12 +615,12 @@ export default function AreaDetailPage() {
           onMapRemoved={() => setArea((a) => ({ ...a, mapUrl: null }))}
         />
 
-        {/* Network config section */}
+        {/* Network config section
         <NetworkConfig
           area={area}
           siteId={siteId}
           onNetworkConfigUpdated={(config) => setArea((a) => ({ ...a, networkConfig: config }))}
-        />
+        /> */}
 
         {/* Devices table heading */}
         <div style={{

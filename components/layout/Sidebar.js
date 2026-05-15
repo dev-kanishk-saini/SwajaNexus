@@ -58,12 +58,12 @@ export default function Sidebar() {
             <Zap size={14} color="#fff" />
           </div>
           <span style={{
-            fontFamily: "'Syne', sans-serif",
+            fontFamily: "'Space Grotesk', sans-serif",
             fontWeight: 800, fontSize: 17,
             letterSpacing: "-0.03em",
             color: "var(--text-primary)",
           }}>
-            NexaHome
+            SwajaNexus.
           </span>
         </div>
 
@@ -116,12 +116,12 @@ export default function Sidebar() {
               <Zap size={16} color="#fff" />
             </div>
             <span style={{
-              fontFamily: "'Syne', sans-serif",
+              fontFamily: "'Space Grotesk', sans-serif",
               fontWeight: 800, fontSize: 18,
               letterSpacing: "-0.03em",
               color: "var(--text-primary)",
             }}>
-              NexaHome
+              SwajaNexus.
             </span>
           </div>
 
@@ -197,7 +197,7 @@ export default function Sidebar() {
           color: "var(--text-muted)",
           fontSize: 12,
         }}>
-          v0.1.0 — NexaHome
+          v0.1.0 — SwajaNexus 
         </div>
       </aside>
 

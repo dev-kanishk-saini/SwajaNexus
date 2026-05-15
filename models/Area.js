@@ -8,7 +8,7 @@ const AreaSchema = new mongoose.Schema(
     controlNodemacaddress: { type: String, trim: true, default: "" },
     mapUrl: { type: String, default: null }, // stored file path or URL
     mapCloudinaryId:  { type: String, default: null }, 
-    networkConfig: { type: mongoose.Schema.Types.Mixed, default: "" }, // raw JSON stored directly in DB
+   
     siteId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Site",

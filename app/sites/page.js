@@ -7,10 +7,10 @@ import Link from "next/link";
 import { MapPin, Plus, Pencil, Trash2, ChevronRight, Building2 } from "lucide-react";
 import {
   PageHeader, Button, Modal, FormField, Input, EmptyState,
-  ConfirmDialog, Spinner,
+  ConfirmDialog, Spinner, Badge,
 } from "@/components/ui";
 
-function SiteFormModal({ open, onClose, initial, onSaved }) {
+ function SiteFormModal({ open, onClose, initial, onSaved }) {
   const [form, setForm] = useState({ name: "", description: "", location: "" });
   const [loading, setLoading] = useState(false);
 
@@ -199,6 +199,11 @@ export default function SitesPage() {
                     {site.description}
                   </p>
                 )}
+                {/* Badges */}
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  
+                  {site.networkConfig && <Badge label="Network config" color="blue" />}
+                  </div>              
 
                 {/* Actions */}
                 <div style={{

@@ -14,13 +14,33 @@ export async function PUT(req, { params }) {
     }
 
     // Update each device's x and y in parallel
-    const updates = devices.map((device) =>
-      Device.findByIdAndUpdate(
-        device._id,
-        { x: device.x, y: device.y },
-        { new: true }
-      )
-    );
+    const updates = devices.map((device) => {
+  if (device.isNew) {
+    return new Device({
+      name:                 device.name,
+      type:                 device.type,
+      x:                    device.x,
+      y:                    device.y,
+      meshAddress:          device.meshAddress || "",
+      macAddress:           device.macAddress  || "",
+      installationLocation: device.installationLocation || "",
+      areaId:               params.areaId,
+    }).save();
+  }
+  return Device.findByIdAndUpdate(
+    device._id,
+    {
+      x:                    device.x,
+      y:                    device.y,
+      name:                 device.name,
+      type:                 device.type,
+      meshAddress:          device.meshAddress,
+      macAddress:           device.macAddress,
+      installationLocation: device.installationLocation,
+    },
+    { new: true }
+  );
+});
 
     const updated = await Promise.all(updates);
     return NextResponse.json(updated);
